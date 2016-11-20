@@ -7,11 +7,11 @@ class SwiftExample<T : Equatable> {
     private var code : (() -> T)
     private var expectedResult : (() -> T)!
     
-    init(code : () -> T){
+    init(code : @escaping () -> T){
         self.code = code
     }
     
-    func returns(expectedResult : () -> T) -> SwiftExample<T>{
+    func returns(expectedResult : @escaping () -> T) -> SwiftExample<T>{
         self.expectedResult = expectedResult
         return self
     }
@@ -21,14 +21,14 @@ class SwiftExample<T : Equatable> {
     }
 }
 
-func thisCode<T>(code : () -> T) -> SwiftExample<T>{
+func thisCode<T>(code : @escaping () -> T) -> SwiftExample<T>{
     return SwiftExample<T>(code: code)
 }
 
 class SwiftExamplesTest : XCTestCase{
     class func addTestForExample<T>(example : SwiftExample<T>, withName name : String){
         let testToRun = { example.runExample() }
-        let implementation = imp_implementationWithBlock(unsafeBitCast(testToRun as @convention(block) () -> (), AnyObject.self))
+        let implementation = imp_implementationWithBlock(unsafeBitCast(testToRun as @convention(block) () -> (), to: AnyObject.self))
         let methodName = Selector(name)
         let types = "v@:"
         class_addMethod(self, methodName, implementation, types)
@@ -36,28 +36,28 @@ class SwiftExamplesTest : XCTestCase{
 }
 
 extension String {
-    func forExample<T>(examples : SwiftExample<T>...){
+    func forExample<T>(_ examples : SwiftExample<T>...){
         forExample(examples)
     }
     
-    func forInstance<T>(examples : SwiftExample<T>...){
+    func forInstance<T>(_ examples : SwiftExample<T>...){
         forExample(examples)
     }
     
-    func i_e<T>(examples : SwiftExample<T>...){
+    func i_e<T>(_ examples : SwiftExample<T>...){
         forExample(examples)
     }
     
-    private func forExample<T>(examples : [SwiftExample<T>]){
-        for (index, example) in examples.enumerate(){
-            let methodName = getMethodName(index);
-            SwiftExamplesTest.addTestForExample(example, withName: methodName)
+    private func forExample<T>(_ examples : [SwiftExample<T>]){
+        for (index, example) in examples.enumerated(){
+            let methodName = getMethodName(index: index);
+            SwiftExamplesTest.addTestForExample(example: example, withName: methodName)
         }
     }
     
     private func getMethodName(index : Int) -> String{
-        let charactersToRemove = NSCharacterSet.alphanumericCharacterSet().invertedSet
-        let strippedReplacement = self.componentsSeparatedByCharactersInSet(charactersToRemove).joinWithSeparator("_")
+        let charactersToRemove = NSCharacterSet.alphanumerics.inverted
+        let strippedReplacement = self.components(separatedBy: charactersToRemove).joined(separator: "_")
         return "test\(strippedReplacement)_\(index)";
     }
 }
@@ -90,11 +90,6 @@ This is an attempt to teach the Swift Programming Language using itself and bein
 
 "We don't even have to specify the type of a constant or variable since the compiler is able to infer it".i_e(
     thisCode{
-        let constant = "Hello"
-        return constant
-    }.returns{ "Hello" },
-    
-    thisCode{
         var variable = 5
         variable = 7
         return variable
@@ -102,12 +97,6 @@ This is an attempt to teach the Swift Programming Language using itself and bein
 )
 
 "And crazily, we can name variables and constants with any Unicode characters - even emojis".forInstance(
-    thisCode{
-        let π = 3.14159
-        return π
-    }.returns{
-        3.14159
-    },
     thisCode{
         var 👍 = "Success"
         return 👍
@@ -192,13 +181,13 @@ This is an attempt to teach the Swift Programming Language using itself and bein
 //: Boilerplate to make the tests work
 
 class PlaygroundTestObserver : NSObject, XCTestObservation {
-    @objc func testCase(testCase: XCTestCase, didFailWithDescription description: String, inFile filePath: String?, atLine lineNumber: UInt) {
+    @objc func testCase(_ testCase: XCTestCase, didFailWithDescription description: String, inFile filePath: String?, atLine lineNumber: UInt) {
         print("Test failed on line \(lineNumber): \(testCase.name), \(description)")
     }
 }
 
 let observer = PlaygroundTestObserver()
-let center = XCTestObservationCenter.sharedTestObservationCenter()
+let center = XCTestObservationCenter.shared()
 center.addTestObserver(observer)
 
 struct TestRunner {
@@ -207,7 +196,7 @@ struct TestRunner {
         print("Running test suite \(testClass)")
         let tests = testClass as! XCTestCase.Type
         let testSuite = tests.defaultTestSuite()
-        testSuite.runTest()
+        testSuite.run()
         let run = testSuite.testRun as! XCTestSuiteRun
         
         print("Ran \(run.executionCount) tests in \(run.testDuration)s with \(run.totalFailureCount) failures")
@@ -217,6 +206,6 @@ struct TestRunner {
 
 //: Run your tests
 
-TestRunner().runTests(SwiftExamplesTest)
+TestRunner().runTests(testClass: SwiftExamplesTest.self)
 
 
