@@ -1,4 +1,4 @@
-#Learning Swift By Example
+# Learning Swift By Example
 
 I have been practicing Swift for some time now and I think I have got a good taste of many of its features. Then, some time ago, I found this [gist][1] that uses Ruby to present examples to learn Ruby in an uncommon way. It is based on the following premises:
 
@@ -115,8 +115,6 @@ Although the current implementation is pretty powerful, it still has some limita
 ## Conclusion
 
 This little experiment shows the power Swift has to build a **Domain-Specific Language** (DSL) in a few lines of code. I didn't even had to use features like **operator overloading** or **protocol extensions**, which gives you a lot of freedom to extend existing things to match your needs.
-
-I hope you have enjoyed the post as much as I did when I was doing this Playground, and feel free to leave a comment below if you want to discuss anything!
 
  [1]: https://gist.github.com/raul/544948
  [2]: http://initwithstyle.net/2015/11/tdd-in-swift-playgrounds/
